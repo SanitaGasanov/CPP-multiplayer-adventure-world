@@ -4,28 +4,28 @@ L
                                                                                 
                                                                                 
 iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
-i                           w                                    w             i
-iwwwwwwwwwwwwwwww           w            w                       w    K        i
-i                           w            w    wwwwwwwwwwww?wwwwwwwwwwwwww      i
-i                           w            w    w                  w             i
-i         wwwwwwwwwwwwwwwwwww            w    w                  w             2
-i                                    wwwwwwwwww                  w             i
-i                                    w                           w             i
-i                                    w                           w             i
-iwwwwwwwwwwwww                       w                      wwwwwwwwww         i
-i            w      wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww              w             i
-i            w                       w                           w             i
-i            w                       wwwwww                wwwwwww      K      i
-i            wwwwwwwww                    wwwwwwww         w                   i
-i            w                                   w   @     w                   i
-1            w                  w                w         w          wwwwwwwwwi
-i            wwwwwwwww          w        wwwwwwwwwwwwwwwwwww                   i
-i                               w                          w                   i
-i                               w                          w                   i
+i         w        w         w         w   w   w  w    #   w              w    i
+i         w  !     w         *         w   w   w  w    #   w              w    i
+i         w        w         *         w   w   w  w    #   w                   i
+i         w        w         w         w   w   w  w    #   wwwwwwwwwwww        i
+2                  w         w         w   w   w           w                   i
+i                  w         w         w   w   w           w                   i
+i                  w         w         w   w               w                   3
+i                + wwwwwwwwwww         w                   w       wwwwwwwwwwwwi
+i                  w      w                     wwwww****wwwwww                i
+i                  w      w                     w             w                i
+i                  w      w                     w             w                i
+i                  w      w                     w             www              i
+iwwwwwwwwwwwwww    w      w                     w               w              i
+iwwwwwwwwwwww      w      w                    ww               wwwww          i
+i                  w      w                    ww              K               i
+i                  wwwwwwww                    ww                              i
+i         @        w      w                    ww               wwwww          i
+i                  w      w                    ww               w              i
 iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
 
 [DATA]
-PLAYER1 1 20
-PLAYER2 2 20
-DOOR 2 1 0 2  0 - 0 0
-RIDDLE 58 9
+PLAYER1 1 7
+PLAYER2 2 7
+DOOR 3 1 0 1 0 - 0 0
+DARK 1 19 14 23

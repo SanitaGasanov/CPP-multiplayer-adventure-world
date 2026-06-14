@@ -1,4 +1,0 @@
-0: Level Changed to: 1
-77: Player 2 lost health
-117: Player 2 added health
-136: Game Ended. Score P1: 0 P2: 0

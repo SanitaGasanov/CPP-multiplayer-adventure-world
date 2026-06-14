@@ -1,0 +1,33 @@
+L                                                                               
+                                                                                
+                                                                                
+                                                                                
+                                                                               
+iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+iwwww                                                   wwwwwwwwww             i
+iwwwwwwwwwwwwwwwwwwww                wwwwww             ww       w      wwwwwwwi
+i       ?          ww                wwwwww             ww         w    w    wwi
+i                  ww                                   ww      ?    wwww    wwi
+i                  ww                                   ww           wwww    wwi
+i                  ww                                   ww                   wwi
+i          wwwwwwwwww                                   ww                   wwi
+i                               wwwwww                  ww                   wwi
+i                               wwwwww                  wwwww                wwi
+i                               wwwwww                  wwwww                  i
+iwwww                                                                          i
+iwwww                                                                          i
+iwwww                                                                          i
+iwww                                          www                              i
+iww                    wwwwww                 www             www      \ \ \ \ 1
+i                      wwwwww                 www             www              i
+iww                    wwwwww                 www       ?     www              i
+iww                                           www             www              i
+iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+
+[DATA]
+PLAYER1 10 14
+PLAYER2 10 15
+DOOR 1 0 1 0 4 /\// 71 20 
+RIDDLE 8 8
+RIDDLE 56 22
+RIDDLE 64 9

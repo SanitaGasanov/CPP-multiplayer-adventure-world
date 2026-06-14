@@ -1,0 +1,20 @@
+Ex2 Fixes Report
+================
+
+1. Unlimited Rooms & Hardcoded Identifiers (-10, -2)
+  - The game now supports any number of levels and custom filenames automatically.
+  - It loads ANY file that starts with "adv-world" and ends with ".screen".
+  - It sorts them lexicographically.
+
+2. Incorrect Filename Ending (-0.5)
+   - Renamed all level files to explicitly end with ".screen" (removed hidden .txt).
+
+3. Code Quality: Duplication & Constants (-2, -2)
+   - Refactored 'Screen.cpp' to use single functions for both players (removed duplication).
+   - Replaced magic numbers with named constants from 'Enums.h'.
+
+4. Cleanup (-1)
+   - Removed all commented-out legacy code.
+   
+5. Input Moved to Game Class:
+ Riddles no longer handle their own input. We moved this logic to the main Game class to centralize all user interactions.

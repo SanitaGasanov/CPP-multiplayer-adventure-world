@@ -1,0 +1,31 @@
+L                                                                               
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+i         w        w         w         w   w   w  w    #   w              w    i
+i         w  !     w         *         w   w   w  w    #   w              w    i
+i         w        w         *         w   w   w  w    #   w                   i
+i         w        w         w         w   w   w  w    #   wwwwwwwwwwww        i
+2                  w         w         w   w   w           w                   i
+i                  w         w         w   w   w           w                   i
+i                  w         w         w   w               w                   3
+i                + wwwwwwwwwww         w                   w       wwwwwwwwwwwwi
+i                  w      w                     wwwww****wwwwww                i
+i                  w      w                     w             w                i
+i                  w      w                     w             w                i
+i                  w      w                     w             www              i
+iwwwwwwwwwwwwww    w      w                     w               w              i
+iwwwwwwwwwwww      w      w                    ww               wwwww          i
+i                  w      w                    ww              K               i
+i                  wwwwwwww                    ww                              i
+i         @        w      w                    ww               wwwww          i
+i                  w      w                    ww               w              i
+iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+
+[DATA]
+PLAYER1 1 7
+PLAYER2 2 7
+DOOR 3 1 0 1 0 - 0 0
+DARK 1 19 14 23

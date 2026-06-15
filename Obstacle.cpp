@@ -1,76 +1,157 @@
-#pragma once
-///////////////////////////////////////////////////////////
+#include "Obstacle.h"
 
-#include "Screen.h"
-#include "Enums.h"
-#include <conio.h>  //for _getch()
-
-
-////////////////////////////////////////////////////////////////
-
-class Menu
+Obstacle::Obstacle(Screen& screen, const Point& startPos, int room, bool visited[MAX_Y][MAX_X])
+    : my_screen(screen)
 {
-	const char* menu_screens[2][MAX_Y] =
-	{
-		//   01234567890123456789012345678901234567890123456789012345678901234567890123456789
-			"                                                                                ", // 0 
-			"                                                                                ", // 1  
-			"         __      __  ____  _      ___   ___   __  __  ____                      ", // 2
-		    "        \\ \\    / / |  __| | |    / __| / _ \\ |  \\/  | |  __|                ", // 3
-		    "         \\ \\/\\/ /  | |__  | |__ | (__ | (_) || |\\/| | | |__                 ", // 4
-		    "          \\_/\\_/   |____| |____| \\___| \\___/ |_|  |_| |____|                 ", // 5
-			"                                                                                ", // 6   
-			"                                                                                ", // 7
-			"                                                                                ", // 8
-			"                       START A NEW GAME (TAP 1)                                 ", // 9 
-			"                                                                                ", // 10
-			"                                                                                ", // 11
-			"                       ADD SOME COLORS (TAP 2)                                  ", // 12
-			"                                                                                ", // 12
-			"                                                                                ", // 14
-			"                       PRESENT INSTRUCTIONS AND KEYS (TAP 8)                    ", // 15
-			"                                                                                ", // 16
-			"                                                                                ", // 17
-			"                       EXIT (TAP 9)                                             ", // 18  
-			"                                                                                ", // 19
-			"                                                                                ", // 20  
-			"                                                                                ", // 21
-			"                                                                                ", // 22
-			"                                                                                ", // 23
-			"                                                                                "  // 24
-		,
-		"                                                                                ", //0
-			"                                                                                ", // 1  
-			"                                                                                ", // 2  
-			"                                                                                ", // 3
-			"                    >>>  S  E  T  T  I  N  G  S  <<<                            ", // 4
-			"                                                                                ", // 5   
-			"                                                                                ", // 6
-			"                                                                                ", // 7
-			"                CONTROLS:                                                       ", // 8
-			"                       PLAYER 1 ($)    |    PLAYER 2 (&)                        ", // 9
-			"                     -----------------------------------                        ", // 10
-			"                      UP: W            |    UP: I                               ", // 11
-			"                      LEFT: A          |    LEFT: J                             ", // 12
-			"                      DOWN: X          |    DOWN: M                             ", // 13
-			"                      RIGHT: D         |    RIGHT: L                            ", // 14
-			"                      STAY: S          |    STAY: K                             ", // 15
-			"                      DISPOSE: E       |    DISPOSE: O                          ", // 16
-			"                                                                                ", // 17 
-			"                                                                                ", // 18
-			"    B O M B : @   |   K E Y : K  |    R I D D L E : ?   |    S W I T C H : \\   ", // 19
-			"                                                                                ", // 20
-			"          S P R I N G : #   |   T O R C H : !   |   O B S T A C L E : *         ", // 21
-			"                                                                                ", // 22
-			"                          B O N U S  L I F E : +                                ", // 23
-			"                                  HAVE FUN!                                     "  // 24
+    findAllPoints(startPos, room, visited);
+}
+///////////////////////////////////////////////////////////
+// Find all connected points to form the obstacle 
 
-	};
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-public:
-	void draw(int room) const; //draw menu screen
+void Obstacle::findAllPoints(const Point& p, int room, bool visited[MAX_Y][MAX_X])
+{
+    std::vector<Point> openList; // List of points to explore
+    openList.push_back(p);
 
-	//////////////////////////////////////////////////
+    while (!openList.empty())
+    {
+        Point p = openList.back();
+        openList.pop_back();
 
-	int user_choice() const;
-};
+        int x = p.getX();
+        int y = p.getY();
+
+        if (x < 0 || x >= MAX_X || y < 0 || y >= MAX_Y) // check bounds
+            continue;
+
+        if (visited[y][x]) // check if already visited
+            continue;
+
+        char ch = my_screen.getCharAt(p, room);
+        if (ch != OBSTACLE_CHAR)
+            continue;
+
+        // We found a valid part of the obstacle
+        visited[y][x] = true;
+
+        p.setChar(OBSTACLE_CHAR);
+        body.push_back(p);
+
+        //add neighboring points to explore
+        openList.push_back(Point(x + 1, y, 0, 0, ' ')); // Right
+        openList.push_back(Point(x - 1, y, 0, 0, ' ')); // Left
+        openList.push_back(Point(x, y + 1, 0, 0, ' ')); // Down
+        openList.push_back(Point(x, y - 1, 0, 0, ' ')); // Up
+    }
+}
+
+/////////////////////////////////////
+//Check if a point is part of the obstacle
+
+bool Obstacle::isPartOfObstacle(const Point& targetP) const
+{
+    for (const Point& p : body)
+    {
+        if (p.getX() == targetP.getX() && p.getY() == targetP.getY())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+/////////////////////////////////////////////////////////////////
+// Erase the obstacle from the screen
+
+void Obstacle::eraseFromScreen(int room)
+{
+    for (const Point& p : body)
+    {
+        Point toDelete = p;
+        toDelete.setChar(' ');
+        my_screen.setCharAt(toDelete, room);
+        toDelete.draw(' ');
+    }
+}
+
+///////////////////////////////////////////////////////////////
+// Draw the obstacle to the screen
+
+void Obstacle::drawToScreen(int room)
+{
+    for (const Point& p : body)
+    {
+        my_screen.setCharAt(p, room);
+        p.draw();
+    }
+}
+
+///////////////////////////////////////////////////////////////
+// Push the obstacle in a given direction with a certain force
+
+bool Obstacle::push(Direction dir, int force, int room)
+{
+    if (force < getSize()) // Not enough force to move the obstacle
+        return false;
+
+    int dx = 0, dy = 0;
+
+    switch (dir) // Moving direction
+    {
+    case Direction::UP:
+        dy = -1;
+        break;
+    case Direction::DOWN:
+        dy = 1;
+        break;
+    case Direction::LEFT:
+        dx = -1;
+        break;
+    case Direction::RIGHT:
+        dx = 1;
+        break;
+    default:
+        return false;
+    }
+
+    if (isMovementPossible(dir, room, dx, dy) == false) // Check if movement is possible
+    {
+        return false;
+    }
+
+    // Move is valid, update positions
+
+    eraseFromScreen(room); // Remove obstacle from current position
+
+    for (Point& p : body) // Update each point's position
+    {
+        p.setX(p.getX() + dx);
+        p.setY(p.getY() + dy);
+    }
+
+    drawToScreen(room); // Draw obstacle at new position
+
+    return true;
+}
+
+///////////////////////////////////////////////////////////////
+// Check if movement is possible in the given direction
+bool Obstacle::isMovementPossible(Direction dir, int room, int dx, int dy)
+{
+    for (const Point& p : body) // Check if movement is possible
+    {
+
+        Point nextPos(p.getX() + dx, p.getY() + dy, 0, 0, ' '); // Next position after move
+
+        if (nextPos.getX() < 0 || nextPos.getX() >= MAX_X || nextPos.getY() < 0 || nextPos.getY() >= MAX_Y) // Out of bounds
+            return false;
+
+        char charAtNewPos = my_screen.getCharAt(nextPos, room);
+
+        if (charAtNewPos != ' ' && !isPartOfObstacle(nextPos)) // if the next position is not empty and not part of the obstacle cannot move
+        {
+            return false;
+        }
+    }
+    return true;
+}

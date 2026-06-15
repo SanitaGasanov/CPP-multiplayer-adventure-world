@@ -1,141 +1,174 @@
 #pragma once
 
-#include "Enums.h"
-#include "Point.h"
-#include "Screen.h"
-#include "Player.h"
+////////////////////////////////////////////////
+#include <iostream>
+#include <vector>
+#include <string>
+#include <stdexcept>
+/////////////////////////////////////////////////
 
-
-/////////////////////////////////////////////////////////////
-
-class Door  //in every room i have only one key - so i dont need room num here or match key to room- we must use the key to open the door
+using std::cout;
+using std::endl;
+using std::cin;
+using std::string;
+using std::vector;
+/////////////////////////////////////////////////
+enum class GameEventType
 {
-	int num_of_door;   //or sign
-	Screen& my_screen;
+	LEVEL_CHANGE,
 
-	//////////////////////////////////////////////////////////////
+	PLAYER_1_DEAD,
+	PLAYER_2_DEAD,
 
-	int counter = 0;  //counting how many times players standing on this door.
+	PLAYER_1_LOST_HEALTH,
+	PLAYER_2_LOST_HEALTH,
 
-	bool need_key;
-	int num_of_key = 0;
+	PLAYER_1_ADD_HEALTH,
+	PLAYER_2_ADD_HEALTH,
 
-	int counter_of_keys = 0;
-	bool collect_all_key = 0;
+	PLAYER_1_PASSED_LEVEL,
+	PLAYER_2_PASSED_LEVEL,
 
-	///////////////////////////////////////////////////////////
+	GAME_ENDED,
+	GAME_STARTED,
 
-	bool need_switch;
-	int num_of_switch;
-	const char* solution;
-	Point first_point_of_switches;
+	RIDDLE_ANSWER
+};
 
-	/////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////
 
-	bool itsAMatch = 0;
-	bool door_is_open = 0;
+enum ScreensXY
+{
+	INVENTORY_X_P1 = 52,   //P1= $
 
-	//////////////////////////////////////////////////////////////////
+	INVENTORY_X_P2 = 65, //P2= &
 
-public:
+	INVENTORY_Y = 2,
 
-	Door(Screen& screen, int my_door_num, bool if_need_a_key, bool if_need_a_switch, int how_many_keys = -1, int how_many_switches = -1, const char* solu = "", Point p = Point(0, 0, 0, 0, 'w'));
+	HEALTH_Y = 2,
+
+	HEALTH_X_P1 = 11,   //P1= $
+
+	HEALTH_X_P2 = 17, //P2= &
+
+	SCORE_Y = 3,
+
+	SCORE_X = 68,   //P1= $ and  P2= &
+
+	MESSAGE_Y = 1,
+
+	MESSAGE_X = 10,   //P1= $ and  P2= &
+
+	HINT_Y = 3,
+
+	HINT_X = 7,   //P1= $ and  P2= &
+
+	L_LIMIT = 19,  //max legal line ( X ) for L in screen
+
+	L_SIZE = 5,  //L total numbers os lines
+
+	LEVEL_Y = 2,   //sssd
+
+	LEVEL_X = 30,   //P1= $ and  P2= & //sssd
+
+	MAX_LEVEL_DIGITS = 6,
+
+	MAX_SCORE_DIGITS = 5
+
+};
+//////////////////////////////////////////////////
 
 
-	
 
-	///////////////////////////////////////////////////////////////////////////////////////////
-	void AddThisKey()
-	{
-		counter_of_keys++;   //if player collect key we add 1 key to counter
-		setThisKey();
-	}
-	///////////////////////////////////////////////////////////////////////////////////////////
-	void DeleteThisKey()
-	{
-		counter_of_keys--; //if player collect key we delete 1 key from counter
-		setThisKey();
-	}
-	///////////////////////////////////////////////////////////////////////////////////////////
-	void setThisKey()
-	{
-		if (num_of_key <= counter_of_keys)
-		{
-			collect_all_key = 1;
-		}
-		else
-		{
-			collect_all_key = 0;
-		}
-	}
 
-	////////////////////////////////////////////////////////////////////////////////////////////   
-	void itsAMatchFunc()
-	{
-		if ((collect_all_key != 0) && (need_key != 0))
-		{
-			itsAMatch = 1;
-		}
-		else
-		{
-			itsAMatch = 0;
-		}
-	}
-	//////////////////////////////////////////////////////////////////////////////////////////////
-	void itsASwitchMatch(int my_room);
 
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	//overloading:
-	void openDoor(Player my_player, int room);
+enum class Direction {
+	UP,
+	RIGHT,
+	DOWN,
+	LEFT,
+	STAY
 
-	//////////////////////////////////////////////////////////////////////////////////////////////
-	void openDoor(int room);
+}; //up=0 right=1..... stay=4
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+enum { MAX_X = 80, MAX_Y = 25 };
 
-	void changeRoom(Player& my_character, int& room);  //calling only is door is open!!!!
+///////////////////////////////////////////////////////////
 
-	//////////////////////////////////////////////////////////////////////////////////////////////
-	void ResetDoor();
-	//////////////////////////////////////////////////////////////////////////////////////////////
+enum special_nums_for_menu { NINE = 57, ONE = 49, TWO = 50, EIGHT = 56 };  /// the value in ascii   //colors
 
-	int getNumDoor() const
-	{
-		return (num_of_door);
-	}
+///////////////////////////////////////////////////////////
+enum special_nums_for_riddle { Three = 51, FOUR = 52 };  /// the value in ascii   
+///////////////////////////////////////////////////////////
+enum special_nums_for_game { ESC = 27, H = 72, h = 104 };  /// the value in ascii  
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
-	bool getifSwitch() const
-	{
-		return (need_switch);
-	}
-	//////////////////////////////////////////////////////////////////////////////////////////////
-	//2 functions for changeroom function:
-	void addOneToCounter()
-	{
-		counter++;
-	}
-	////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
-	int showCounter() const
-	{
-		return counter;
-	}
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	//for player
-	bool isDoorOpen() const
-	{
-		return door_is_open;
-	}
-	//////////////////////////////////////////////////////////////////////////////////////////
-	bool getItsAMatch()
-	{
-		if (need_key == 1)
-		{
-			itsAMatchFunc();
-		}
-		return itsAMatch;
-	}
-	//////////////////////////////////////////////////////////////////////////////////////////////
-	void configure(int keys_needed, int switches_needed, const string& code, int x_switch, int y_switch, int id);
+enum class ItemType
+{
+	NONE,
+	KEY,
+	BOMB,
+	RIDDLE,
+	SWITCH_ON,
+	SWITCH_OFF,
+	TORCH,
+	SPRING
+};
+
+///////////////////////////////////////////////////////
+// Define characters used in the game
+
+
+constexpr char RIDDLE_CHAR = '?';
+constexpr char  BOMB_CHAR = '@';
+constexpr char  KEY_CHAR = 'K';
+constexpr char  SWITCH_ON_CHAR = '/';
+constexpr char SWITCH_OFF_CHAR = '\\';
+constexpr char  IMMUTABLE_WALL_CHAR = 'i';
+constexpr char  WALL_CHAR = 'w';
+constexpr char  OBSTACLE_CHAR = '*';
+constexpr char TORCH_CHAR = '!';
+constexpr char SPRING_CHAR = '#';
+constexpr char  PLAYER1_CHAR = '$';
+constexpr char  PLAYER2_CHAR = '&';
+constexpr char LIFE_GIFT_CHAR = '+';
+
+///////////////////////////////////////////////////////
+const int NUM_KEYS = 6;  //keys for up, right, down, left, stay, dispose
+const int MOVE_KEYS_COUNT = 5; //number of movement keys (excluding dispose key)
+
+////////////////////////////////////////////////////////
+
+constexpr int DOORS = 3;
+
+////////////////////////////////////////////////////////
+
+enum BombSettings
+{
+	EXPLOSION_RADIUS = 3,
+	EXPLODE_TIMER = 5
+};
+
+/////////////////////////////////////////////////////
+
+enum class Color
+{
+	BLACK = 0,
+	BLUE = 1,
+	GREEN = 2,
+	CYAN = 3,
+	RED = 4,
+	MAGENTA = 5,
+	BROWN = 6,
+	LIGHTGREY = 7,
+	DARKGREY = 8,
+	LIGHTBLUE = 9,
+	LIGHTGREEN = 10,
+	LIGHTCYAN = 11,
+	LIGHTRED = 12,
+	LIGHTMAGENTA = 13,
+	YELLOW = 14,
+	WHITE = 15
 };

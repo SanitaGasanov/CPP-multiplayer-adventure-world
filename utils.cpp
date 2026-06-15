@@ -1,105 +1,67 @@
-#pragma once
+#include "utils.h"
+//////////////////////////////////////////////////
+bool g_use_colors = false;
+bool g_is_silent_mode = false;
 
-#include "Enums.h"
-#include "Point.h"
-#include "Screen.h"
+void gotoxy(int x, int y) {
+    if (g_is_silent_mode) return;
+    cout.flush();
+    COORD coord;
+    coord.X = x;
+    coord.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+//////////////////////////////////////////////////////
 
-////////////////////////////////////////////
-
-class Player;  //forward declaration
-
-////////////////////////////////////////////
-class Spring
+void hideCursor()
 {
-	Screen& my_screen;
-	Point point_of_start;
+    HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_CURSOR_INFO curInfo;
+    GetConsoleCursorInfo(hStdOut, &curInfo);
+    curInfo.bVisible = FALSE; // Set to TRUE to make it visible
+    SetConsoleCursorInfo(hStdOut, &curInfo);
+}
+/////////////////////////////////////////////////////////////////
+void cls() {
+    if (g_is_silent_mode) return;
+    system("cls");
+}
+//////////////////////////////////////////////////////
+void setTextColor(Color color)
+{
+    if (g_is_silent_mode) return;
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (int)color);
+}
 
-	Direction my_oposite_direction;  //oposite direction
-	Direction my_spring_direction;
+void setCharColor(char c)
+{
+    if (!g_use_colors || g_is_silent_mode) return;
 
+    Color color = Color::WHITE;
 
-	int my_power = 0;      //according to deleted chars
-	int game_cycles = 0; //have many steps we have
+    switch (c)
+    {
+    case PLAYER1_CHAR:
+        color = Color::LIGHTCYAN;
+        break;
+    case PLAYER2_CHAR:
+        color = Color::DARKGREY;
+        break;
+    case BOMB_CHAR:
+        color = Color::LIGHTRED;
+        break;
+    case KEY_CHAR:
+    case TORCH_CHAR:
+        color = Color::YELLOW;
+        break;
+    case RIDDLE_CHAR:
+        color = Color::LIGHTMAGENTA;
+        break;
 
-	int counter_char_of_spring = 0;
+    default:
+        color = Color::LIGHTGREY;
+        break;
+    }
 
-	bool start_spring = 0;
-
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////	
-public:
-
-	Spring(Screen& screen);
-
-	///////////////////////////////////////////////////////////////////////////////// ok
-
-	int getCounterChar() const
-	{
-		return counter_char_of_spring;
-	}
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	bool getIfStart() const
-	{
-		return start_spring;
-	}
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	Direction getOpositeDirection() const
-	{
-		return my_oposite_direction;
-	}
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-
-	void ChangeCycles()  //when we get power of string- we start "loop power"
-	{
-		game_cycles = my_power * my_power;
-	}
-
-	//////////////////////////////////////////////////////////////////////////////// ok
-
-	void resetPower(Player& my_player);
-
-	//////////////////////////////////////////////////////////////////////////////// overloading functions
-	void SetPower(Player& my_player);
-	/////////
-	void SetPower(Player& my_player, int power);
-	////////////////////////////////////////////////////////////////////////////////  ok
-
-	Direction updateSpringDirection() const;
-
-	////////////////////////////////////////////////////////////////////////////////  ok
-
-
-	bool ifItsLegalAccess(Point& my_next_point, int current_room_index);
-
-	////////////////////////////////////////////////////////////////////////////////-------we call only when we move to #  ok
-
-	bool collectChars(Player& my_player, Point& my_next_point, int current_room); //we get # point  
-
-	/////////////////////////////////////////////////////////////////////////////////
-
-	void update(Player& my_player);
-
-	//////////////////////////////////////////////////////////////////////////////////
-
-	void drawChars(Player& my_player, int room_index);  // draw again spring chars
-
-
-	//////////////////////////////////////////////////////////////////////////////////
-
-	void startSpringFunc(Player& my_player, int current_room_index);          //if we brake or move
-
-	//////////////////////////////////////////////////////////////////////////////////
-
-	Direction getSpringDirection() const 
-	{
-		return my_spring_direction;
-	}
-
-	void triggerExternalForce(Player& my_player, int speed, Direction dir);
-};
+    setTextColor(color);
+}

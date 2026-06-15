@@ -1,54 +1,49 @@
-#include "Game.h"
-#include <string>
-#include <iostream>
+#include "Menu.h"
 
-int main(int argc, char* argv[])
+///////////////////////////////////////////////////////////////////////////////
+// Draw the menu screen 
+void Menu::draw(int room) const
 {
+	if (g_is_silent_mode) return;
+	cls();
+	gotoxy(0, 0);
 
-    bool isSave = false;
-    bool isLoad = false;
-    bool isSilent = false;
+	for (size_t i = 0; i < MAX_Y - 1; ++i)
+	{
+		cout << menu_screens[room][i] << endl;
+	}
+	cout << menu_screens[room][MAX_Y - 1];
+	cout.flush();
+}
 
-	for (int i = 1; i < argc; ++i)  // read command-line args
-    {
-        std::string arg = argv[i];
-        if (arg == "-save") 
-            isSave = true;
-        else if (arg == "-load") 
-            isLoad = true;
-        else if (arg == "-silent") 
-            isSilent = true;
-    }
+//////////////////////////////////////////////////////////////////////////////
+// Get the user's menu choice
+int Menu::user_choice() const
+{
+	while (true)
+	{
+		char key = (char)_getch();  ////we wating to char ( we dont need  _kbhit() because now screen is ststic)
 
-    Game* game = nullptr;
+		//we dont need here get char if no onw of keys. the loop just start from begining
+		if (key == special_nums_for_menu::EIGHT)
+		{
+			draw(1);
+			key = (char)_getch();  //push- and every char go to menu
+			draw(0);
+		}
+		else if (key == special_nums_for_menu::ONE)
+		{
+			return 1;
+		}
+		else if (key == special_nums_for_menu::NINE)
 
-    try
-    {
+		{
+			return 9;  //dont need break!!!!
+		}
+		else if (key == special_nums_for_menu::TWO)
+		{
+			return 2;
+		}
 
-		if (isLoad || isSilent) // playback/test mode
-        {
-            game = new GameFile(isSilent);
-        }
-        else
-        {
-            game = new GameInteractive(isSave);
-        }
-
-        game->run();
-    }
-	catch (const std::exception& e) // catch standard exceptions
-    {
-        Game::printErrorMessage(e.what());
-        if (game) delete game;
-        return 1;
-    }
-    catch (...)
-    {
-        Game::printErrorMessage("An unknown error occurred.");
-        if (game) delete game;
-        return 1;
-    }
-
-    delete game;
-    return 0;
+	}
 }

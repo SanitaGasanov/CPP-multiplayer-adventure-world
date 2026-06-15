@@ -1,86 +1,54 @@
-#include "Files.h"
-#include <sstream>
+#pragma once
 
+#include "Enums.h"
+#include <vector>
+#include <string>
+#include "Point.h" 
+#include <fstream>
 
-LevelData Files::loadLevelFromFile(const string& filename) // Load level data from a file
+using std::vector;
+using std::string;
+
+struct DoorData  //door info
 {
-    LevelData data;
-    data.isValid = false;
+    int id;
+    int keysRequired;
+    int switchesRequired;
+    int keysNumber;
+    int switchesNumber;
+    int switch_x;
+    int switch_y;
+    string switchCode;
 
-    std::ifstream file(filename);
+};
 
-	if (!file.is_open()) // Check if file opened successfully
-    {
-        return data;
-    }
+struct RiddleData {
+    int id;
+    Point loc;
+};
 
-    data.isValid = true;
-    string line;
-    int row = 0;
-    bool readingData = false;
-    bool foundLegend = false;
+struct LevelData
+{
+    vector<string> currentroom;
+    Point legendLoc = { 0,0,0,0,' ' };
+    Point p1Start = { 1,1,0,0,' ' };
+    Point p2Start = { 2,1,0,0,' ' };
 
-	while (std::getline(file, line)) // Read file line by line
-    {
-       
-        if (line.empty()) 
-            continue;
+    DoorData doorData;
+    bool hasDoor = false;
 
-		if (line.find("[DATA]") != string::npos) // Check for data section
-        {
-            readingData = true;
-            continue;
-        }
+    vector<RiddleData> riddles;
 
-        if (!readingData)
-        {
-            for (size_t i = 0; i < line.length(); i++)
-            {
-                if (line[i] == 'L')
-                {
-                    if (!foundLegend)
-                    {
-                        data.legendLoc.setX((int)i);
-                        data.legendLoc.setY(row);
-                        foundLegend = true;
-                    }
-                    line[i] = ' ';
-                }
-            }
-            data.currentroom.push_back(line);
-            row++;
-        }
-		else // Reading metadata
-        {
-            std::stringstream ss(line); 
-            string type;
-            ss >> type;
+    bool isDark = false;
+    int darkX1 = 0, darkY1 = 0, darkX2 = 0, darkY2 = 0;
 
-            if (type == "PLAYER1") { 
-                int x, y; ss >> x >> y; data.p1Start.setX(x); data.p1Start.setY(y);
-            }
-            else if (type == "PLAYER2") {
-                int x, y; ss >> x >> y; data.p2Start.setX(x); data.p2Start.setY(y);
-            }
-            else if (type == "DOOR") {
-                DoorData& d = data.doorData;
-                ss >> d.id >> d.keysRequired >> d.switchesRequired >> d.keysNumber >> d.switchesNumber;
-                ss >> d.switchCode;
-                if (d.switchCode == "-") d.switchCode = "";
-                ss >> d.switch_x >> d.switch_y;
-                data.hasDoor = true;
-            }
-            else if (type == "RIDDLE") {
-                RiddleData r;
-                int x, y; ss >> x >> y; r.loc = Point(x, y, 0, 0, '?');
-                data.riddles.push_back(r);
-            }
-            else if (type == "DARK") {
-                ss >> data.darkX1 >> data.darkY1 >> data.darkX2 >> data.darkY2;
-                data.isDark = true;
-            }
-        }
-    }
-    file.close();
-    return data;
-}
+    bool isValid = false;
+};
+
+
+class Files
+{
+public:
+
+    static LevelData loadLevelFromFile(const std::string& filename); //loads level data from file
+};

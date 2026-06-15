@@ -1,130 +1,193 @@
-#pragma once
-///////////////////////////////////////////////
-#include "Point.h" 
-#include "Enums.h"
-#include "utils.h"
-
-class Player;
-
-#include <cstring>  
-
+#include "Spring.h"
 ////////////////////////////////////////////////////
+#include "Player.h"   //forward declaration
 
-class Screen
+//////////////////////////////////////////////////////////////////////////////////////
+
+Spring::Spring(Screen& screen) : my_screen(screen)
 {
-	vector<vector<string>> current_screens;
-	vector<vector<string>> templates_screens;
+	counter_char_of_spring = 0;
+	my_power = 0;
+	start_spring = false;
+	game_cycles = 0;
 
-	struct DarkRoom  //to know which room is dark
+	my_oposite_direction = Direction::STAY;
+	my_spring_direction = Direction::STAY;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+void Spring::resetPower(Player& my_player)
+{
+	my_power = 0;          //set in spring
+	my_player.setSpeed(1); //set in player
+	ChangeCycles();        //calling to func to update steps  0*0= 0
+	counter_char_of_spring = 0;
+	start_spring = 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+Direction Spring::updateSpringDirection() const
+{
+	if (my_oposite_direction == Direction::UP)
 	{
-		bool isDark = false;
-		int x1 = 0, y1 = 0, x2 = 0, y2 = 0; //to know the bounds of the dark room (x1,y1,x2,y2)
-	};
-
-	vector<DarkRoom> dark_rooms;
-	vector<Point> legend_locations;
-
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-public:
-
-
-	Screen() = default;  /// default constructor
-
-	bool notValidRoom(int room) const
-	{
-		if (room < 0 || room >= current_screens.size())
-			return true;
-		return false;
+		return Direction::DOWN;
 	}
 
-	////////////////////////////////////////////
-	void addScreenFromFile(const vector<string>& newLevel, const Point& legendLoc); //Add Screen from file
-
-	////////////////////////////////////////////
-	void draw(int room, bool hasTorch = false) const; 
-
-	////////////////////////////////////////////
-
-	char getCharAt(const Point& p, int room) const  //const in right side tell that we dont change the  classs members in this file class.
+	else if (my_oposite_direction == Direction::DOWN)
 	{
-		if (notValidRoom(room)) return ' ';
-		if (p.getY() < 0 || p.getY() >= MAX_Y || p.getX() < 0 || p.getX() >= MAX_X) return ' ';
-		return current_screens[room][p.getY()][p.getX()];
+		return Direction::UP;
 	}
-	////////////////////////////////////////////
 
-	void setCharAt(const Point& p, int room)  //function to change the char in the current screen
+	else if (my_oposite_direction == Direction::LEFT)
 	{
-		if (notValidRoom(room)) return;
-		if (p.getY() < 0 || p.getY() >= MAX_Y || p.getX() < 0 || p.getX() >= MAX_X) return;
-		current_screens[room][p.getY()][p.getX()] = p.getChar();
+		return Direction::RIGHT;
 	}
-	//////////////////////////////////////////////
 
-	void setHealthAt(const Player& my_player, int room);
-
-	/////////////////////////////////////////////////
-
-	void setInventoryAt(const Player& my_player, int room);
-
-	//////////////////////////////////////////////////
-
-	void delInventoryAt(const Player& my_player, int room);
-
-	/////////////////////////////////////////////////
-
-	void setMessageAt(int room, const char* new_str); 
-	//////////////////////////////////////////////////
-	void delMessageAt(int room);
-
-	///////////////////////////////////////////////////
-
-	void setHintAt(int room, const char* new_str); 
-
-	//////////////////////////////////////////////////
-
-	void setSwitch(Point& place, int index_room)
+	else if (my_oposite_direction == Direction::RIGHT)
 	{
-		char current_char_on_screen = getCharAt(place, index_room);
+		return Direction::LEFT;
+	}
 
-		if (current_char_on_screen == SWITCH_ON_CHAR)
-		{
-			place.setChar(SWITCH_OFF_CHAR);
+	return Direction::STAY;
+}
+/////////////////////////////////////////////////////////////////////////////
+bool Spring::ifItsLegalAccess(Point& my_next_point, int current_room_index)
+{
+	// äëéååï ùáå äùç÷ï îðñä ìäéëðñ ì÷ôéõ
+	Direction my_direction = my_next_point.getDirectionFromDiff(
+		my_next_point.getdiffX(),
+		my_next_point.getdiffY()
+	);
+
+	Point check_pos = my_next_point;
+	char char_at_pos = my_screen.getCharAt(check_pos, current_room_index);
+
+	// ðîùéê ìáãå÷ ÷ãéîä ëì òåã àðçðå òì ÷ôéöéí
+	while (char_at_pos == SPRING_CHAR) {
+		check_pos.setDirection(my_direction);
+		check_pos = check_pos.nextPos();
+		char_at_pos = my_screen.getCharAt(check_pos, current_room_index);
+	}
+
+	// àí áñåó øöó ä÷ôéöéí äâòðå ì÷éø - äàéñåó çå÷é!
+	if (char_at_pos == WALL_CHAR || char_at_pos == IMMUTABLE_WALL_CHAR) {
+		if (my_direction != my_oposite_direction) {
+			my_oposite_direction = my_direction;
+			my_spring_direction = updateSpringDirection();
 		}
-		else
+		return true;
+	}
+	return false;
+}
+//////////////////////////////////////////////////////////////////////////////////////
+
+bool Spring::collectChars(Player& my_player, Point& my_next_point, int current_room)
+{
+	if (ifItsLegalAccess(my_next_point, current_room))
+	{
+		my_next_point.setChar(' ');
+		counter_char_of_spring++;
+		if (counter_char_of_spring == 1)
 		{
-			place.setChar(SWITCH_ON_CHAR);
+			point_of_start = my_next_point.prevPos();
 		}
-		setCharAt(place, index_room);
+		my_screen.setCharAt(my_next_point, current_room);
+		return true;
 	}
+	return false;
+}
+//////////////////////////////////////////////////////////////////////////////////////
 
-	///////////////////////////////////////////////////
-
-	void restart();
-
-	////////////////////////////////////////////////////
-	//function to set darkness in room
-	void setDarkness(int room, int x1, int y1, int x2, int y2)
+void Spring::update(Player& my_player)
+{
+	if ((start_spring != 0) && (game_cycles > 0))
 	{
-		dark_rooms[room].isDark = true;
-		dark_rooms[room].x1 = x1;
-		dark_rooms[room].y1 = y1;
-		dark_rooms[room].x2 = x2;
-		dark_rooms[room].y2 = y2;
+		game_cycles--;
+		if (game_cycles <= 0)
+		{
+			resetPower(my_player);
+		}
 	}
-	////////////////////////////////////////////////////////////////////////////
-	void updateLight(int room, bool hasTorch) const;
+}
+//////////////////////////////////////////////////////////////////////////////////////
+// 
+// overloading functions!!!!!!!
+void Spring::SetPower(Player& my_player)
+{
+	my_power = counter_char_of_spring;          //set in spring
+	my_player.setSpeed(counter_char_of_spring);//set in player
+	ChangeCycles();        //calling to func to update steps
+}
+/////////
+void Spring::SetPower(Player& my_player, int power)
+{
+	my_power = power;          //set in spring
+	my_player.setSpeed(power);//set in player
+	ChangeCycles();        //calling to func to update steps
+}
 
-	int getNumLevels() const
+//////////////////////////////////////////////////////////////////////////////////////
+
+
+
+void Spring::drawChars(Player& my_player, int room_index)
+{
+	Point temp_point = point_of_start;
+	int dx = 0;
+	int dy = 0;
+
+	switch (my_oposite_direction)
 	{
-		return (int)current_screens.size();
+	case Direction::UP:    dy = -1; break;
+	case Direction::DOWN:  dy = 1;  break;
+	case Direction::LEFT:  dx = -1; break;
+	case Direction::RIGHT: dx = 1;  break;
+	default: break;
 	}
 
-	void LoadLegend(vector<string>& currentLevel, const Point& legendLocation);
+	for (int i = 0; i < counter_char_of_spring; i++)
+	{
+		temp_point.setX(temp_point.getX() + dx);
+		temp_point.setY(temp_point.getY() + dy);
 
-	///////////////////////////////////////////////////////////////////////////////////
+		char char_at_dest = my_screen.getCharAt(temp_point, room_index);
 
-	void setScoreAt(const Player& my_player1, const Player& my_player2, int room);
-	
-	void setLevelAt(int room);
-};
+		if (char_at_dest == ' ' || char_at_dest == SPRING_CHAR || char_at_dest == my_player.getCharacter())
+		{
+			temp_point.setChar(SPRING_CHAR);
+			my_screen.setCharAt(temp_point, room_index);
+
+			if (char_at_dest != my_player.getCharacter())
+			{
+				temp_point.draw();
+			}
+		}
+	}
+	std::cout.flush();
+}
+//////////////////////////////////////////////////////////////////////////////////////
+
+void Spring::startSpringFunc(Player& my_player, int room_index)          //if we brake or move
+{
+	SetPower(my_player);  //update all parameters
+	start_spring = 1;////////////
+	my_player.setDirection(my_spring_direction);
+	drawChars(my_player, room_index);
+
+}
+
+//////////////////////////////////////////////
+
+void Spring::triggerExternalForce(Player& my_player, int speed, Direction dir)
+{
+
+	my_power = speed;
+	my_player.setSpeed(speed);
+	ChangeCycles();
+
+	my_spring_direction = dir;
+
+	start_spring = true;
+}

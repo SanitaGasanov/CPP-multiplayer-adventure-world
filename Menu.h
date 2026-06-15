@@ -1,49 +1,76 @@
-#include "Menu.h"
+#pragma once
+///////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////
-// Draw the menu screen 
-void Menu::draw(int room) const  
+#include "Screen.h"
+#include "Enums.h"
+#include <conio.h>  //for _getch()
+
+
+////////////////////////////////////////////////////////////////
+
+class Menu
 {
-	if (g_is_silent_mode) return;
-	cls();
-	gotoxy(0, 0);
-
-	for (size_t i = 0; i < MAX_Y - 1; ++i)
+	const char* menu_screens[2][MAX_Y] =
 	{
-		cout << menu_screens[room][i] << endl;
-	}
-	cout << menu_screens[room][MAX_Y - 1];
-	cout.flush();
-}
+		//   01234567890123456789012345678901234567890123456789012345678901234567890123456789
+			"                                                                                ", // 0 
+			"                                                                                ", // 1  
+			"         __      __  ____  _      ___   ___   __  __  ____                      ", // 2
+			"        \\ \\    / / |  __| | |    / __| / _ \\ |  \\/  | |  __|                ", // 3
+			"         \\ \\/\\/ /  | |__  | |__ | (__ | (_) || |\\/| | | |__                 ", // 4
+			"          \\_/\\_/   |____| |____| \\___| \\___/ |_|  |_| |____|                 ", // 5
+			"                                                                                ", // 6   
+			"                                                                                ", // 7
+			"                                                                                ", // 8
+			"                       START A NEW GAME (TAP 1)                                 ", // 9 
+			"                                                                                ", // 10
+			"                                                                                ", // 11
+			"                                                                                ", // 12
+			"                                                                                ", // 12
+			"                                                                                ", // 14
+			"                       PRESENT INSTRUCTIONS AND KEYS (TAP 8)                    ", // 15
+			"                                                                                ", // 16
+			"                                                                                ", // 17
+			"                       EXIT (TAP 9)                                             ", // 18  
+			"                                                                                ", // 19
+			"                                                                                ", // 20  
+			"                                                                                ", // 21
+			"                                                                                ", // 22
+			"                                                                                ", // 23
+			"                                                                                "  // 24
+		,
+		"                                                                                ", //0
+			"                                                                                ", // 1  
+			"                                                                                ", // 2  
+			"                                                                                ", // 3
+			"                    >>>  S  E  T  T  I  N  G  S  <<<                            ", // 4
+			"                                                                                ", // 5   
+			"                                                                                ", // 6
+			"                                                                                ", // 7
+			"                CONTROLS:                                                       ", // 8
+			"                       PLAYER 1 ($)    |    PLAYER 2 (&)                        ", // 9
+			"                     -----------------------------------                        ", // 10
+			"                      UP: W            |    UP: I                               ", // 11
+			"                      LEFT: A          |    LEFT: J                             ", // 12
+			"                      DOWN: X          |    DOWN: M                             ", // 13
+			"                      RIGHT: D         |    RIGHT: L                            ", // 14
+			"                      STAY: S          |    STAY: K                             ", // 15
+			"                      DISPOSE: E       |    DISPOSE: O                          ", // 16
+			"                                                                                ", // 17 
+			"                                                                                ", // 18
+			"    B O M B : @   |   K E Y : K  |    R I D D L E : ?   |    S W I T C H : \\   ", // 19
+			"                                                                                ", // 20
+			"          S P R I N G : #   |   T O R C H : !   |   O B S T A C L E : *         ", // 21
+			"                                                                                ", // 22
+			"                          B O N U S  L I F E : +                                ", // 23
+			"                                  HAVE FUN!                                     "  // 24
 
-//////////////////////////////////////////////////////////////////////////////
-// Get the user's menu choice
-int Menu::user_choice() const
-{
-	while (true)
-	{
-		char key = (char)_getch();  ////we wating to char ( we dont need  _kbhit() because now screen is ststic)
+	};
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+public:
+	void draw(int room) const; //draw menu screen
 
-		//we dont need here get char if no onw of keys. the loop just start from begining
-		if (key == special_nums_for_menu::EIGHT)
-		{
-			draw(1);
-			key = (char)_getch();  //push- and every char go to menu
-			draw(0);
-		}
-		else if (key == special_nums_for_menu::ONE)
-		{
-			return 1;
-		}
-		else if (key == special_nums_for_menu::NINE)
+	//////////////////////////////////////////////////
 
-		{
-			return 9;  //dont need break!!!!
-		}
-		else if (key == special_nums_for_menu::TWO)
-		{
-			return 2;
-		}
-
-	}
-}
+	int user_choice() const;
+};

@@ -104,7 +104,7 @@ public:
     virtual void reportEvent(const std::string& msg) override; // writes to result file
 };
 
-//////////////new
+////////////////new
 
 class GameFile : public Game // handles playback/testing
 {

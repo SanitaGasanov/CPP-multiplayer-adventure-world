@@ -1,193 +1,105 @@
-#include "Spring.h"
-////////////////////////////////////////////////////
-#include "Player.h"   //forward declaration
+#pragma once
 
-//////////////////////////////////////////////////////////////////////////////////////
+#include "Enums.h"
+#include "Point.h"
+#include "Screen.h"
 
-Spring::Spring(Screen& screen) : my_screen(screen)
+////////////////////////////////////////////
+
+class Player;  //forward declaration
+
+////////////////////////////////////////////
+class Spring
 {
-	counter_char_of_spring = 0;
-	my_power = 0;
-	start_spring = false;
-	game_cycles = 0;
+	Screen& my_screen;
+	Point point_of_start;
 
-	my_oposite_direction = Direction::STAY;
-	my_spring_direction = Direction::STAY;
-}
+	Direction my_oposite_direction;  //oposite direction
+	Direction my_spring_direction;
 
-//////////////////////////////////////////////////////////////////////////////////////
 
-void Spring::resetPower(Player& my_player)       
-{
-	my_power = 0;          //set in spring
-	my_player.setSpeed(1); //set in player
-	ChangeCycles();        //calling to func to update steps  0*0= 0
-	counter_char_of_spring = 0;
-	start_spring = 0;
-}
+	int my_power = 0;      //according to deleted chars
+	int game_cycles = 0; //have many steps we have
 
-//////////////////////////////////////////////////////////////////////////////////////
+	int counter_char_of_spring = 0;
 
-Direction Spring::updateSpringDirection() const
-{
-	if (my_oposite_direction == Direction::UP)
+	bool start_spring = 0;
+
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////	
+public:
+
+	Spring(Screen& screen);
+
+	///////////////////////////////////////////////////////////////////////////////// ok
+
+	int getCounterChar() const
 	{
-		return Direction::DOWN;
+		return counter_char_of_spring;
 	}
 
-	else if (my_oposite_direction == Direction::DOWN)
+	/////////////////////////////////////////////////////////////////////////////////
+
+	bool getIfStart() const
 	{
-		return Direction::UP;
+		return start_spring;
 	}
 
-	else if (my_oposite_direction == Direction::LEFT)
+	/////////////////////////////////////////////////////////////////////////////////
+
+	Direction getOpositeDirection() const
 	{
-		return Direction::RIGHT;
+		return my_oposite_direction;
 	}
 
-	else if (my_oposite_direction == Direction::RIGHT)
+	/////////////////////////////////////////////////////////////////////////////////
+
+
+	void ChangeCycles()  //when we get power of string- we start "loop power"
 	{
-		return Direction::LEFT;
+		game_cycles = my_power * my_power;
 	}
 
-	return Direction::STAY;
-}
-/////////////////////////////////////////////////////////////////////////////
-bool Spring::ifItsLegalAccess(Point& my_next_point, int current_room_index)
-{
-	// הכיוון שבו השחקן מנסה להיכנס לקפיץ
-	Direction my_direction = my_next_point.getDirectionFromDiff(
-		my_next_point.getdiffX(),
-		my_next_point.getdiffY()
-	);
+	//////////////////////////////////////////////////////////////////////////////// ok
 
-	Point check_pos = my_next_point;
-	char char_at_pos = my_screen.getCharAt(check_pos, current_room_index);
+	void resetPower(Player& my_player);
 
-	// נמשיך לבדוק קדימה כל עוד אנחנו על קפיצים
-	while (char_at_pos == SPRING_CHAR) {
-		check_pos.setDirection(my_direction);
-		check_pos = check_pos.nextPos();
-		char_at_pos = my_screen.getCharAt(check_pos, current_room_index);
-	}
+	//////////////////////////////////////////////////////////////////////////////// overloading functions
+	void SetPower(Player& my_player);
+	/////////
+	void SetPower(Player& my_player, int power);
+	////////////////////////////////////////////////////////////////////////////////  ok
 
-	// אם בסוף רצף הקפיצים הגענו לקיר - האיסוף חוקי!
-	if (char_at_pos == WALL_CHAR || char_at_pos == IMMUTABLE_WALL_CHAR) {
-		if (my_direction != my_oposite_direction) {
-			my_oposite_direction = my_direction;
-			my_spring_direction = updateSpringDirection();
-		}
-		return true;
-	}
-	return false;
-}
-//////////////////////////////////////////////////////////////////////////////////////
+	Direction updateSpringDirection() const;
 
-bool Spring::collectChars(Player& my_player, Point& my_next_point, int current_room)
-{
-	if (ifItsLegalAccess(my_next_point, current_room))
+	////////////////////////////////////////////////////////////////////////////////  ok
+
+
+	bool ifItsLegalAccess(Point& my_next_point, int current_room_index);
+
+	////////////////////////////////////////////////////////////////////////////////-------we call only when we move to #  ok
+
+	bool collectChars(Player& my_player, Point& my_next_point, int current_room); //we get # point  
+
+	/////////////////////////////////////////////////////////////////////////////////
+
+	void update(Player& my_player);
+
+	//////////////////////////////////////////////////////////////////////////////////
+
+	void drawChars(Player& my_player, int room_index);  // draw again spring chars
+
+
+	//////////////////////////////////////////////////////////////////////////////////
+
+	void startSpringFunc(Player& my_player, int current_room_index);          //if we brake or move
+
+	//////////////////////////////////////////////////////////////////////////////////
+
+	Direction getSpringDirection() const
 	{
-		my_next_point.setChar(' ');
-		counter_char_of_spring++;
-		if (counter_char_of_spring == 1)
-		{
-			point_of_start = my_next_point.prevPos();
-		}
-		my_screen.setCharAt(my_next_point, current_room);
-		return true;
-	}
-	return false;
-}
-//////////////////////////////////////////////////////////////////////////////////////
-
-void Spring::update(Player& my_player)
-{
-	if ((start_spring != 0) && (game_cycles > 0))
-	{
-		game_cycles--;
-		if (game_cycles <= 0)
-		{
-			resetPower(my_player);
-		}
-	}
-}
-//////////////////////////////////////////////////////////////////////////////////////
-// 
-// overloading functions!!!!!!!
-void Spring::SetPower(Player& my_player)
-{
-	my_power = counter_char_of_spring;          //set in spring
-	my_player.setSpeed(counter_char_of_spring);//set in player
-	ChangeCycles();        //calling to func to update steps
-}
-/////////
-void Spring::SetPower(Player& my_player, int power)
-{
-	my_power = power;          //set in spring
-	my_player.setSpeed(power);//set in player
-	ChangeCycles();        //calling to func to update steps
-}
-
-//////////////////////////////////////////////////////////////////////////////////////
-
-
-
-void Spring::drawChars(Player& my_player, int room_index)
-{
-	Point temp_point = point_of_start;
-	int dx = 0;
-	int dy = 0;
-
-	switch (my_oposite_direction)
-	{
-	case Direction::UP:    dy = -1; break;
-	case Direction::DOWN:  dy = 1;  break; 
-	case Direction::LEFT:  dx = -1; break;
-	case Direction::RIGHT: dx = 1;  break; 
-	default: break;
+		return my_spring_direction;
 	}
 
-	for (int i = 0; i < counter_char_of_spring; i++)
-	{
-		temp_point.setX(temp_point.getX() + dx);
-		temp_point.setY(temp_point.getY() + dy);
-
-		char char_at_dest = my_screen.getCharAt(temp_point, room_index);
-
-		if (char_at_dest == ' ' || char_at_dest == SPRING_CHAR || char_at_dest == my_player.getCharacter())
-		{
-			temp_point.setChar(SPRING_CHAR);
-			my_screen.setCharAt(temp_point, room_index);
-
-			if (char_at_dest != my_player.getCharacter())
-			{
-				temp_point.draw();
-			}
-		}
-	}
-	std::cout.flush();
-}
-//////////////////////////////////////////////////////////////////////////////////////
-
-void Spring::startSpringFunc(Player& my_player, int room_index)          //if we brake or move
-{
-	SetPower(my_player);  //update all parameters
-	start_spring = 1;////////////
-	my_player.setDirection(my_spring_direction);
-	drawChars(my_player, room_index);
-
-}
-
-//////////////////////////////////////////////
-
-void Spring::triggerExternalForce(Player& my_player, int speed, Direction dir)
-{
-
-	my_power = speed;
-	my_player.setSpeed(speed);
-	ChangeCycles();
-
-	my_spring_direction = dir;
-
-	start_spring = true;
-}
+	void triggerExternalForce(Player& my_player, int speed, Direction dir);
+};
